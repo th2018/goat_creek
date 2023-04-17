@@ -1,0 +1,53 @@
+---
+title: "Untitled"
+author: "Tao"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r}
+# install.packages("xlsx")
+library("openxlsx")
+library("readxl")
+#install.packages("strucchange")
+library("strucchange")
+library("lubridate")
+library("dplyr") # for data wrangling and pipelines
+library("ggplot2") # for modifying fasstr plots
+# install.packages("qqplotr")
+library(qqplotr)
+#The R package rnoaa is used to access NOAA NCDC climate data.
+#install.packages("rnoaa")
+library("rnoaa")
+library("rgdal")
+library("maptools")
+library("utils")
+# install.packages("ppcc")
+library("ppcc")
+# install.packages("gbm")
+library("gbm")
+# install.packages("caret")
+library("caret")
+#install.packages("pdp")
+library("pdp")          # model visualization
+```
+
+```{r}
+
+
+#unzip("Pahsimeroi_River.zip")
+ws<- readOGR("Big_Springs_Creek/layers/globalwatershed.shp")
+extent<-raster::extent(ws)
+
+
+```
+
+
+
+
+
+
+
+
+
+
