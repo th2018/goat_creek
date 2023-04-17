@@ -2,7 +2,9 @@
 title: "Untitled"
 author: "Tao"
 date: "`r Sys.Date()`"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r}
@@ -51,4 +53,192 @@ ws_stations<-stations[stations$latitude> extent@ymin &
            stations$longitude<extent@xmax &
              stations$last_year>2019,]
 unique(ws_stations$id)
+```
+
+#PRISM_ppt_tmin_tmean_tmax_tdmean_vpdmin_vpdmax_early_4km_20191001_20230401_44.2192_-114.9517-GC
+```{r}
+prism<-read.csv("PRISM_ppt_tmin_tmean_tmax_tdmean_vpdmin_vpdmax_early_4km_20191001_20230401_44.2192_-114.9517-GC.csv", skip = 10)
+prism$Date <-as.Date(prism$Date, format="%Y-%m-%d")
+summary(prism)
+head(prism)
+```
+
+```{r}
+xlsx="FY21_CBWTP_Monitoring_IWRB_Temp_data_01.13.2022.xlsx"
+
+
+sheets<-excel_sheets("FY21_CBWTP_Monitoring_IWRB_Temp_data_01.13.2022.xlsx")
+sheets
+
+
+```
+
+```{r}
+gc<-read_excel(xlsx , sheet = sheets[9], skip = 11 )
+gc$water_t_c<-   (gc$`Temperature (f)` -32)*5/9
+gc$Date_1<-as.Date(gc$Date)
+gc<-merge(gc, prism, by.x= "Date_1",by.y= "Date")
+summary(gc)
+head(gc)
+plot(gc$Date, gc$vpdmax..hPa.)
+```
+
+```{r}
+saveRDS(gc,file="gc.rds")
+```
+
+```{r}
+plot(gc$Date, gc$ppt..mm.   )
+ggplot( gc, aes(  Date, ppt..mm.  )) +
+    geom_bar(stat="identity", na.rm = TRUE) +
+    ggtitle("Daily Precipitation") +
+    xlab("Date") + ylab("Precipitation (mm)") +#    scale_x_date(labels=date_format ("%b %y"), breaks=date_breaks("1 year")) +
+    theme(plot.title = element_text(lineheight=.8, face="bold", size = 20)) +   theme(text = element_text(size=18))
+```
+
+```{r}
+hist(gc$`Temperature (f)`)
+hist(gc$tmean..degrees.C.)
+hist(gc$water_t_c )
+hist(gc$`Flow (cfs)`)
+hist(log(gc$`Flow (cfs)`))
+```
+
+The Q-Q plot, or quantile-quantile plot, is a graphical tool to help us assess if a set of data plausibly came from some theoretical distribution such as a Normal or exponential.
+
+```{r}
+ppccTest( gc$`Flow (cfs)`, "qnorm") #Normal
+## see Table 2 of Looney and Gulledge (1985, p.78)
+ggplot(mapping = aes(sample =  gc$`Flow (cfs)` )) + stat_qq_point(size = 2)
+ggplot(mapping = aes(sample =  gc$`Flow (cfs)` ))+ stat_qq_point(size = 2,color = "red")+ stat_qq_line(color="dodgerblue")+ xlab("x-axis") + ylab("y-axis")
+```
+
+Construct F-statistics to consider whether or not a change occurred at time use the residuals for a subsample are compared to the residuals for the unsegmented dataset, 
+
+#breakpoint of air_t
+```{r}
+myts <- ts(  gc$tmean..degrees.C. , start = c( 1 #julian( morgan$Date[1]) 
+                                             ), frequency = 1)
+myts
+plot(myts)
+fs.myts <- Fstats(myts ~ 1)
+plot(fs.myts)
+breakpoints(fs.myts)
+lines(breakpoints(fs.myts))
+breakpoints<-breakpoints(fs.myts)$breakpoints
+plot(gc$Date, gc$tmean..degrees.C.)
+par(new=T)
+abline(v=gc[breakpoints,])
+#plot(morgan[breakpoints,]$Date, morgan[breakpoints,]$tmean..degrees.C., col="red")
+plot(gc$Date, (gc$tmean..degrees.C. ) , type="l", col="dodgerblue", xlab="", ylab="Air temperature (degC) ", main="Goat Creek")
+abline(v=gc[breakpoints,], col="red")
+```
+
+#breakpoint of  
+```{r}
+myts <- ts(  gc$`Flow (cfs)`, start = c( 1 #julian( morgan$Date[1]) 
+                                             ), frequency = 1)
+myts
+plot(myts)
+fs.myts <- Fstats(myts ~ 1)
+plot(fs.myts)
+breakpoints(fs.myts)
+lines(breakpoints(fs.myts))
+breakpoints<-breakpoints(fs.myts)$breakpoints
+plot(gc$Date, log(gc$`Flow (cfs)`) , type="l", col="dodgerblue", xlab="", ylab="log(Flow (cfs))", main="Goat Creek")
+abline(v=gc[breakpoints,], col="red")
+```
+
+```{r}
+myts <- ts(  gc$`Temperature (f)` , start = c( 1 #julian( morgan$Date[1]) 
+                                             ), frequency = 1)
+myts
+plot(myts)
+fs.myts <- Fstats(myts ~ 1)
+plot(fs.myts)
+breakpoints(fs.myts)
+lines(breakpoints(fs.myts))
+breakpoints<-breakpoints(fs.myts)$breakpoints
+#plot(bsc$Date,  bsc$`Temperature (f)`   )
+#abline(v=bsc[breakpoints,])
+plot(gc$Date,  gc$water_t_c , type="l", col="dodgerblue", xlab="", ylab="Stream temperature (degC)", main="Goat Creek")
+abline(v=gc[breakpoints,], col="red")
+
+```
+
+```{r}
+summary(lm( gc$water_t_c~gc$`Flow (cfs)`+ gc$tmean..degrees.C.))
+x=seq(-5,30)
+plot(gc$tmean..degrees.C., gc$water_t_c, xlim=c(-5,25), ylim=c(-5,25) )
+par(new=T)
+plot(x,x, xlim=c(-5,25), ylim=c(-5,25),type="l")
+```
+
+```{r}
+gc_1<-gc[!is.na(gc$`Flow (cfs)`) , c("water_t_c","Flow (cfs)", "tmean..degrees.C.")]
+# set seed for generating random data.
+set.seed(1)          
+# createDataPartition() function from the caret package to split the original dataset into a training and testing set and split data into training (80%) and testing set (20%)
+parts = createDataPartition(  gc_1$water_t_c , p = .75, list = F)
+train =gc_1[parts,c( "water_t_c","Flow (cfs)", "tmean..degrees.C." ) ]
+test = gc_1[-parts,c( "water_t_c", "Flow (cfs)", "tmean..degrees.C.")  ]
+# feature and target array
+test_x = test[, -1] 
+test_y = test[, 1] 
+```
+
+Fits generalized boosted regression models.
+```{r}
+model_gbm = gbm( train$water_t_c     ~.,
+                data = train,
+                distribution = "gaussian",
+                cv.folds = 10,
+                shrinkage = .01,
+                n.minobsinnode = 10,
+                n.trees = 800)
+ 
+# model performance
+perf_gbm1 = gbm.perf( model_gbm, method = "cv")
+print(model_gbm)
+summary(model_gbm)
+rinf<-summary(model_gbm)
+barplot( rinf$rel.inf , horiz = TRUE, las = 1)
+ggplot(rinf, aes(rel.inf)) + geom_bar()
+ggplot( rinf, aes( var , rel.inf ))+  geom_col()+ 
+  coord_flip()
+```
+
+```{r}
+#rinf$var<- factor(rinf$var, levels=c(  "max_AirTemperature_C" ,"log_median_Q"
+             #,"min_Discharge"             ,      "max_SolarRadiation" ,
+#             "doy"  ))
+ggplot( rinf, aes( var , rel.inf ))+  geom_col()+ 
+  coord_flip()
+ggplot( rinf )+  geom_bar(  aes( x=var, y= rel.inf),  stat = "summary")+ scale_x_discrete(labels=  c( "Streamflow", "mean Air Temperature C" ) )+ylab("Relative importance (%)") +xlab(" ")  + theme(text=element_text(size=14))
+```
+
+```{r}
+#test_y <-test_y$max_StreamTemp
+pred_y = predict.gbm(model_gbm, test_x)
+residuals =  test_y   - pred_y
+summary(test_y )
+xlim=c(5,30)
+RMSE = sqrt(mean(residuals^2))
+cat('The root mean square error of the test data is ', round(RMSE,3),'\n')
+y_test_mean = mean( test_y  )
+# Calculate total sum of squares
+tss =  sum(( test_y   - y_test_mean)^2 )
+# Calculate residual sum of squares
+rss =  sum(residuals^2)
+# Calculate R-squared
+rsq  =  1 - (rss/tss)
+cat('The R-square of the test data is ', round(rsq,3), '\n')
+# visualize the model, actual and predicted data
+x_ax = 1:length(pred_y)
+plot(x_ax, test_y  , col="blue", pch=20, cex=.9)
+lines(x_ax, pred_y, col="red", pch=20, cex=.9) 
+plot(  test_y , pred_y,xlim= xlim ,ylim= xlim, xlab="Observed stream temperature (degC)", ylab="Predicted stream temperature (degC)", main="GBM")
+par(new=T)
+x=seq(1,30)
+plot(x,x,type="l",xlim= xlim ,ylim= xlim,xlab="",ylab="")
 ```
