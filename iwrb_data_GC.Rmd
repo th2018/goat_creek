@@ -33,21 +33,22 @@ library("pdp")          # model visualization
 ```
 
 ```{r}
-
-
-#unzip("Pahsimeroi_River.zip")
-ws<- readOGR("Big_Springs_Creek/layers/globalwatershed.shp")
+#unzip("goat_creek.zip")
+getwd()
+ws<- readOGR("layers/globalwatershed.shp")
 extent<-raster::extent(ws)
-
-
 ```
 
-
-
-
-
-
-
-
-
-
+```{r}
+#This function returns an object with a dataframe with meta-information about all available GHCND weather stations.
+#stations<-ghcnd_stations()
+load("station.Rdata")
+stations
+#save(stations , file = "station.Rdata")
+ws_stations<-stations[stations$latitude> extent@ymin &
+           stations$latitude<extent@ymax&
+           stations$longitude>extent@xmin&
+           stations$longitude<extent@xmax &
+             stations$last_year>2019,]
+unique(ws_stations$id)
+```
