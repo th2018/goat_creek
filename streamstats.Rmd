@@ -1,0 +1,22 @@
+---
+title: "library(streamstats)"
+author: "Tao"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r}
+# install.packages("pak")
+# pak::pkg_install("r-lib/rlang")
+# install.packages("vctrs")
+# devtools::install_github("markwh/streamstats")
+library(streamstats)
+```
+
+```{r}
+ws1 <- delineateWatershed(xlocation =    -114.9517057, ylocation =  44.21918355, crs = 4326, 
+                          includeparameters = "true", includeflowtypes = "true")
+ws1 
+
+```
+
