@@ -1,0 +1,199 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r}
+library("magrittr")
+library("tidyverse")
+library("viridis")
+library("lubridate")
+library("mblm")
+```
+
+```{r}
+gc<-readRDS("gc.rds")
+gc
+```
+
+```{r}
+name<-"Goat Creek"
+gc$tavg_wat_C<- gc$water_t_c
+gc$tavg_air_C<- gc$tmean..degrees.C.
+gc$date <- gc$Date
+summary(gc)
+```
+
+```{r}
+gc %>%
+#    filter(tavg_wat_C > 1)%>%
+    ggplot(aes(x = tavg_air_C, y = tavg_wat_C #, color = factor(year(date))
+               )) +
+   geom_point()+
+    stat_smooth(method = "lm", col = "red")+
+    geom_abline(slope = 1, intercept = 0, lty= 2)+
+    # Add a legend to the plot
+    #geom_text("Black Line is 1:1", colour = "black")+
+    scale_color_viridis(discrete=TRUE)+
+    labs(x = "Air Temperature (C)", y= "Stream Temperature (C)", colour="Year",title=name)+
+    xlim(0, max(gc$tavg_air_C ) )+
+    ylim(0, max(gc$tavg_air_C ) )+
+    theme_bw()
+```
+
+
+
+
+
+
+
+
+https://github.com/Haredkb/PASTA/blob/master/R/plotFunctions.R
+
+1. EF OF SF SALMON RIVER AT STIBNITE, ID
+2011-2022
+```{r}
+site_id<-13311000
+name<-"EF OF SF SALMON RIVER AT STIBNITE, ID"
+prism_df<-readRDS("prism_df_13311000.rds")
+prism_df$tavg_wat_C<-prism_df$mean_StreamTemp
+prism_df$tavg_air_C<-prism_df$mean_AirTemperature_C 
+prism_df$date <-prism_df$Date 
+summary(prism_df)
+plot_TMlm(prism_df)
+```
+
+```{r}
+prism_df %>%
+    filter(tavg_wat_C > 1)%>%
+    ggplot(aes(x = tavg_air_C, y = tavg_wat_C, color = factor(year(date)))) +
+   geom_point()+
+    stat_smooth(method = "lm", col = "red")+
+    geom_abline(slope = 1, intercept = 0, lty= 2)+
+    # Add a legend to the plot
+    #geom_text("Black Line is 1:1", colour = "black")+
+    scale_color_viridis(discrete=TRUE)+
+    labs(x = "Air Temperature (C)", y= "Stream Temperature (C)", colour="Year",title=name)+
+    xlim(0, max(prism_df$mean_AirTemperature_C) )+
+    ylim(0, max(prism_df$mean_AirTemperature_C) )+
+    theme_bw() #+
+#    facet_grid(rows = vars(site_id)) #rows = vars(site_id))
+```
+
+
+3. BSG
+```{r}
+site_id<-"BSG"
+name<-"Dry Creek Bogus South Gage"
+daily_df<-readRDS("daily_df_bogus.rds")
+daily_df$tavg_wat_C<-daily_df$mean_StreamTemp
+daily_df$tavg_air_C<-daily_df$mean_AirTemperature_C 
+
+daily_df$yr<-year(daily_df$date)
+
+table( (daily_df$yr))
+summary(daily_df)
+```
+
+```{r}
+
+
+prism_df<-daily_df[daily_df$yr %in% c(2012 ,2014 ,2015 ,2016, 2017  , 2020),]
+
+prism_df %>%
+    filter(tavg_wat_C > 1)%>%
+    ggplot(aes(x = tavg_air_C, y = tavg_wat_C, color = factor(year(date)))) +
+   geom_point()+
+    stat_smooth(method = "lm", col = "red")+
+    geom_abline(slope = 1, intercept = 0, lty= 2)+
+    # Add a legend to the plot
+    #geom_text("Black Line is 1:1", colour = "black")+
+    scale_color_viridis(discrete=TRUE)+
+    labs(x = "Air Temperature (C)", y= "Stream Temperature (C)", colour="Year",title=name)+
+    xlim(0, max(prism_df$mean_AirTemperature_C) )+
+    ylim(0, max(prism_df$mean_AirTemperature_C) )+
+    theme_bw( )+ 
+    theme(text=element_text(size=16) ) #+
+#    facet_grid(rows = vars(site_id)) #rows = vars(site_id))
+
+#model.k = mblm(  mean_StreamTemp ~  mean_AirTemperature_C,data= prism_df)
+
+#summary(model.k)
+
+
+```
+
+
+2. USGS 13337099 CLEAR CK AT KOOSKIA NATIONAL FISH HATCHERY
+2016-2022
+```{r}
+site_id<-13337099
+name<-"USGS CLEAR CK AT KOOSKIA NATIONAL FISH HATCHERY"
+prism_df<-readRDS("prism_df_13337099.rds")
+prism_df$tavg_wat_C<-prism_df$mean_StreamTemp
+prism_df$tavg_air_C<-prism_df$mean_AirTemperature_C 
+prism_df$date <-prism_df$Date 
+summary(prism_df)
+```
+
+```{r}
+prism_df %>%
+    filter(tavg_wat_C > 1)%>%
+    ggplot(aes(x = tavg_air_C, y = tavg_wat_C, color = factor(year(date)))) +
+   geom_point()+
+    stat_smooth(method = "lm", col = "red")+
+    geom_abline(slope = 1, intercept = 0, lty= 2)+
+    # Add a legend to the plot
+    #geom_text("Black Line is 1:1", colour = "black")+
+    scale_color_viridis(discrete=TRUE)+
+    labs(x = "Air Temperature (C)", y= "Stream Temperature (C)", colour="Year",title=name)+
+    xlim(0, max(prism_df$mean_AirTemperature_C) )+
+    ylim(0, max(prism_df$mean_AirTemperature_C) )+
+    theme_bw()+ 
+    theme(text=element_text(size=14) ) #+
+#    facet_grid(rows = vars(site_id)) #rows = vars(site_id))
+```
+
+```{r}
+model.k = mblm(  mean_StreamTemp ~  mean_AirTemperature_C,data= prism_df)
+
+summary(model.k)
+```
+
+
+3. USGS 13296000 YANKEE FORK SALMON RIVER NR CLAYTON ID
+2011-2020
+```{r}
+site_id<-13296000
+name<-"USGS YANKEE FORK SALMON RIVER NR CLAYTON ID"
+prism_df<-readRDS("prism_df_13296000.rds")
+prism_df$tavg_wat_C<-prism_df$mean_StreamTemp
+prism_df$tavg_air_C<-prism_df$mean_AirTemperature_C 
+prism_df$date <-prism_df$Date 
+summary(prism_df)
+```
+
+```{r}
+prism_df %>%
+    filter(tavg_wat_C > 1)%>%
+    ggplot(aes(x = tavg_air_C, y = tavg_wat_C, color = factor(year(date)))) +
+   geom_point()+
+    stat_smooth(method = "lm", col = "red")+
+    geom_abline(slope = 1, intercept = 0, lty= 2)+
+    # Add a legend to the plot
+    #geom_text("Black Line is 1:1", colour = "black")+
+    scale_color_viridis(discrete=TRUE)+
+    labs(x = "Air Temperature (C)", y= "Stream Temperature (C)", colour="Year",title=name)+
+    xlim(0, max(prism_df$mean_AirTemperature_C) )+
+    ylim(0, max(prism_df$mean_AirTemperature_C) )+
+    theme_bw()+ 
+    theme(text=element_text(size=14) ) #+
+#    facet_grid(rows = vars(site_id)) #rows = vars(site_id))
+```
+
+```{r}
+model.k = mblm(  mean_StreamTemp ~  mean_AirTemperature_C,data= prism_df)
+summary(model.k)
+```
+
+
