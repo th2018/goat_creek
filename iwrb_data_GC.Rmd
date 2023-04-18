@@ -65,12 +65,8 @@ head(prism)
 
 ```{r}
 xlsx="FY21_CBWTP_Monitoring_IWRB_Temp_data_01.13.2022.xlsx"
-
-
 sheets<-excel_sheets("FY21_CBWTP_Monitoring_IWRB_Temp_data_01.13.2022.xlsx")
 sheets
-
-
 ```
 
 ```{r}
@@ -84,7 +80,7 @@ plot(gc$Date, gc$vpdmax..hPa.)
 ```
 
 ```{r}
-saveRDS(gc,file="gc.rds")
+#saveRDS(gc,file="gc.rds")
 ```
 
 ```{r}
