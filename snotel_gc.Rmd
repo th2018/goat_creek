@@ -1,0 +1,112 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r}
+# install.packages("xlsx")
+library("openxlsx")
+library("readxl")
+#install.packages("strucchange")
+library("strucchange")
+library("lubridate")
+library("dplyr") # for data wrangling and pipelines
+library("ggplot2") # for modifying fasstr plots
+# install.packages("qqplotr")
+library(qqplotr)
+#The R package rnoaa is used to access NOAA NCDC climate data.
+#install.packages("rnoaa")
+library("rnoaa")
+library("rgdal")
+library("maptools")
+library("utils")
+
+
+```
+
+# input
+```{r}
+
+
+lon_lat<-c(  -114.9517057 ,  44.21918355 )
+```
+
+
+```{r}
+#unzip("goat_creek.zip")
+getwd()
+ws<- readOGR("layers/globalwatershed.shp")
+extent<-raster::extent(ws)
+```
+
+# load packages
+```{r}
+#install.packages("snotelr")
+library("snotelr")
+library("ggplot2")
+library("foreign")
+library("dplyr")
+# install.packages("geosphere")
+library("geosphere")
+library(sf)
+#install.packages("cropgrowdays")
+library("cropgrowdays")
+```
+
+# find the snotel site
+```{r}
+#list site information
+site_meta_data <- snotel_info()
+head(site_meta_data)
+site_meta_ID <-site_meta_data[site_meta_data$state=="ID"
+                                   
+                                    ,]
+site_meta_ID$dist<-0
+# 
+ for (i in c(1:  dim(site_meta_ID )[1]) ) {
+#   print(i)
+   site_meta_ID[i,]$dist<-as.numeric(distm( lon_lat , c(site_meta_ID[i,]$longitude, site_meta_ID[i,]$latitude), fun = distHaversine))
+ 
+ }
+site_meta_ID[order( site_meta_ID$dist, decreasing = FALSE),]
+```
+
+```{r}
+id= 312
+Sys.time()
+df <- snotel_download(site_id = id , internal = TRUE)
+df$date<-as.POSIXct( df$date,format="%Y-%m-%d")
+df$year<-format( df$date, "%Y")
+df
+plot(df$date, df$snow_water_equivalent)
+Sys.time()
+```
+
+```{r}
+
+
+save(df,file = "snotel_312.Rdata")
+
+
+```
+
+```{r}
+snow_2021<-df[df$year=="2021",]
+snow_2021
+plot(snow_2021$date,snow_2021$snow_water_equivalent)
+```
+
+```{r}
+xlsx="FY21_CBWTP_Monitoring_IWRB_Temp_data_01.13.2022.xlsx"
+gc<-read_excel(xlsx , sheet = sheets[9], skip = 11 )
+gc$water_t_c<-   (gc$`Temperature (f)` -32)*5/9
+gc$Date_1<-as.Date(gc$Date)
+```
+
+```{r}
+ggplot() +
+  geom_point(aes(x = snow_2021$date,y =  snow_2021$snow_water_equivalent ),data= snow_2021)  +
+  geom_point(aes(x = gc$Date,y =   gc$`Flow (cfs)` *16),data=gc , color="dodgerblue" ) +
+    scale_y_continuous("Snow water equivalent", sec.axis = sec_axis(~ ./16, name = "Flow (cfs)"),) +
+  xlab(label = ' ')+ labs(title = "Goat Creek")
+```
