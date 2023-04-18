@@ -13,3 +13,5 @@ streamstats.Rmd: watershed delineation.
 iwrb_data_GC.Rmd: (1) plot the time series data and (2) calculate the breakpoint statistics.
 
 https://code.earthengine.google.com/4ae471353f91604725b5fc0d25fb8816: watershed satellite images.
+
+# Projection description
