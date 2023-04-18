@@ -5,3 +5,5 @@ ws_extent.ipynb: get the watershed extent.
 streamstats.Rmd: watershed delineation.
 
 iwrb_data_GC.Rmd: plotting the data.
+
+PRISM climate data
