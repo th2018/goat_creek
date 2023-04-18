@@ -41,6 +41,12 @@ gc %>%
     theme_bw()
 ```
 
+```{r}
+plot(gc$date , gc$tavg_wat_C ,ylim=c( min(gc$tmean..degrees.C.), max(gc$tmean..degrees.C. ) ) , col="dodgerblue", main="Goat Creek", ylab="Temperature",xlab="")
+par(new=T)
+plot(gc$date ,gc$tavg_air_C  ,ylim=c( min(gc$tmean..degrees.C.), max(gc$tmean..degrees.C. ) )  , ylab=" ",xlab="" )
+
+```
 
 
 
