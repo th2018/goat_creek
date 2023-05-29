@@ -130,6 +130,40 @@ plot(gc$Date, (gc$tmean..degrees.C. ) , type="l", col="dodgerblue", xlab="", yla
 abline(v=gc[breakpoints,], col="red")
 ```
 
+```{r}
+#install.packages("strucchange")
+library("strucchange")
+library("lubridate")
+library("dplyr") # for data wrangling and pipelines
+library("ggplot2") # for modifying fasstr plots
+# install.packages("qqplotr")
+library(qqplotr)
+# install.packages("segmented")
+library("segmented")
+library("cropgrowdays")
+brk <- breakpoints(myts  ~ 1, h = 0.1)
+summary(brk)
+plot(brk)
+```
+
+```{r}
+
+
+plot(myts )
+lines(fitted( brk, breaks = 5), col = 4)
+lines(confint( brk, breaks = 5))
+
+
+```
+
+```{r}
+plot(gc$Date, (gc$tmean..degrees.C.   ) , type="l", col="dodgerblue", xlab="", ylab="Air temperature (degC) ", main="Goat Creek")
+abline(v=gc[60,], col="red")
+abline(v=  gc[ 164 ,], col="red")
+```
+
+
+
 #breakpoint of  
 ```{r}
 myts <- ts(  gc$`Flow (cfs)`, start = c( 1 #julian( morgan$Date[1]) 
@@ -143,6 +177,18 @@ lines(breakpoints(fs.myts))
 breakpoints<-breakpoints(fs.myts)$breakpoints
 plot(gc$Date, log(gc$`Flow (cfs)`) , type="l", col="dodgerblue", xlab="", ylab="log(Flow (cfs))", main="Goat Creek")
 abline(v=gc[breakpoints,], col="red")
+```
+
+```{r}
+brk <- breakpoints(myts  ~ 1, h = 0.1)
+summary(brk)
+plot(brk)
+```
+
+```{r}
+plot(gc$Date, log(gc$`Flow (cfs)`  ) , type="l", col="dodgerblue", xlab="", ylab= "log(Flow (cfs))", main="Goat Creek")
+abline(v=gc[63,], col="red")
+abline(v=  gc[ 94 ,], col="red")
 ```
 
 ```{r}
@@ -161,6 +207,31 @@ plot(gc$Date,  gc$water_t_c , type="l", col="dodgerblue", xlab="", ylab="Stream 
 abline(v=gc[breakpoints,], col="red")
 
 ```
+
+
+```{r}
+
+brk <- breakpoints(myts  ~ 1, h = 0.1)
+summary(brk)
+plot(brk)
+```
+
+
+```{r}
+plot(gc$Date, gc$`Temperature (f)` , type="l", col="dodgerblue", xlab="", ylab= "Stream Temperature (f)", main="Goat Creek")
+abline(v=gc[57,], col="red")
+abline(v=  gc[ 165 ,], col="red")
+
+```
+
+
+
+
+
+
+
+
+
 
 ```{r}
 summary(lm( gc$water_t_c~gc$`Flow (cfs)`+ gc$tmean..degrees.C.))
